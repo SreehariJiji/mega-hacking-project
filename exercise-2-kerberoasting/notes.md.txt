@@ -1,104 +1,111 @@
-Exercise 2 — Kerberoasting
+# Exercise 2 — Kerberoasting Lab Notes
 
-Minimal Active Directory lab with one Domain Controller and one Kali VM to demonstrate Kerberoasting against an SPN-linked service account.
+This folder documents the **Kerberoasting – Service Account Credential Recovery lab** used for the Kerberoasting exercise.
 
-Tools used
+---
 
-Setup (Windows):
+## Quick Facts
 
-Server Manager (AD DS + DNS)
+- **Domain (FQDN):** `lab.local`  
+- **NetBIOS:** `LAB`  
+- **Domain Controller OS:** Windows Server 2012 R2 Standard Evaluation  
+- **Attacker VM:** Kali Linux  
+- **Standard User:** `LAB\User1`  
+- **Service Account:** `LAB\svcweb`  
+- **SPN:** `HTTP/webapp.lab.local`  
+- **Isolated Subnet:** `192.168.45.0/24`  
+  - **DC IP used:** `192.168.45.157`  
+  - **Kali IP used:** `192.168.45.133`
 
-Active Directory Users and Computers
+---
 
-setspn
+## Tools Used
 
-Attack + validation (Kali):
+### Setup (Windows)
+- Server Manager (AD DS + DNS)
+- Active Directory Users and Computers
+- `setspn`
 
-Impacket
+### Attack + Validation (Kali)
+- Impacket
+- John the Ripper
+- smbclient
 
-John the Ripper
+---
 
-smbclient
+## VM Specs (Recommended)
 
-Network
+### Domain Controller
+- 2 vCPU  
+- 2–4 GB RAM  
+- ~40 GB disk  
+- 1 NIC on isolated VMware network
 
-Isolated VMware network
+### Kali
+- 2 vCPU  
+- 2–4 GB RAM  
+- ~30–40 GB disk  
+- 1 NIC on the same isolated network
 
-Subnet: 192.168.45.0/24
+---
 
-DC IP used: 192.168.45.157
+## Lab Setup
 
-Kali IP used: 192.168.45.133
+### 1) Build the Domain Controller
+1. Install Windows Server 2012 R2.
+2. Add roles:
+   - **Active Directory Domain Services**
+   - **DNS Server**
+3. Promote to a new forest:
+   - **Domain:** `lab.local`
+4. Reboot.
 
-VM specs (quick)
+---
 
-Windows Server 2012 R2 DC
+### 2) Create OU and Accounts
+In **Active Directory Users and Computers**:
 
-2 vCPU, 2–4 GB RAM, ~40 GB disk
+1. Create an OU:
+   - `LAB USERS`
+2. Create:
+   - Standard user: `User1`
+   - Service account: `svcweb`
 
-Kali
+---
 
-2 vCPU, 2–4 GB RAM, ~30–40 GB disk
+### 3) Assign the SPN
+On the Domain Controller:
 
-Lab setup steps
-1) Build the Domain Controller
+- Assign SPN to the service account:
+  - `HTTP/webapp.lab.local` → `LAB\svcweb`
 
-Install Windows Server 2012 R2.
+- Verify:
+  - `setspn` output should list:
+    - `HTTP/webapp.lab.local`
 
-Add roles:
+---
 
-Active Directory Domain Services
+## Setup Evidence (This Repo)
 
-DNS Server
+Stored under:
+`exercise-2-kerberoasting/lab-setup/`
 
-Promote to new forest:
+1. `1 - DC VM specs.png`  
+2. `2 - Domain created.png`  
+3. `3 - Users created.png`  
+4. `4 - SPN proof.png`
 
-Domain: lab.local
+---
 
-2) Create users
+## Attack Steps (Lab)
 
-In AD Users and Computers:
+1. Confirm Kali can reach the Domain Controller on the lab subnet.
+2. Use **Impacket** to:
+   - enumerate SPN-associated accounts  
+   - request a service ticket for `HTTP/webapp.lab.local`  
+   - export the TGS hash for `LAB\svcweb`
+3. Use **John the Ripper** to crack the exported hash (baseline password).
+4. Use **smbclient** to confirm authentication with the recovered `svcweb` credentials.
 
-Create OU: LAB USERS
+---
 
-Create user:
-
-User1
-
-Create service account:
-
-svcweb
-
-3) Create the SPN
-
-On the DC, assign SPN to the service account:
-
-HTTP/webapp.lab.local → LAB\svcweb
-
-Verify SPN exists for the account using setspn.
-
-Your setup screenshots are saved in:
-
-lab-setup/1 - DC VM specs.png
-
-lab-setup/2 - Domain created.png
-
-lab-setup/3 - Users created.png
-
-lab-setup/4 - SPN proof.png
-
-Attack steps (lab)
-
-From Kali, ensure domain connectivity to the DC.
-
-Use Impacket to:
-
-enumerate SPN-associated accounts
-
-request a service ticket for HTTP/webapp.lab.local
-
-export the TGS hash for LAB\svcweb
-
-Use John the Ripper to crack the exported hash (baseline weak password).
-
-Use smbclient to confirm authentication with the recovered svcweb credentials.
