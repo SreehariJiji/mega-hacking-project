@@ -1,9 +1,0 @@
-docker version
-
-Docker version 27.5.1+dfsg4, build cab968b3
-
-docker compose version
-
-Docker Compose version 2.32.4-3
-
-Linux kali 6.16.8+kali-amd64 #1 SMP PREEMPT_DYNAMIC Kali 6.16.8-1kali1 (2025-09-24) x86_64 GNU/Linux
