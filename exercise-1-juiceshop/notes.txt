@@ -1,0 +1,89 @@
+# Exercise 1 — OWASP Juice Shop Lab Notes
+
+This folder documents the **OWASP Juice Shop** lab setup used for the web exploitation exercise.
+
+---
+
+## Quick Facts
+
+- **Platform:** OWASP Juice Shop  
+- **Deployment:** Docker on Kali Linux  
+- **Access URL:** `http://localhost:3000`  
+- **Port:** `3000/TCP`  
+- **Host VM:** Kali Linux  
+- **Virtualization:** VMware Workstation/Player  
+
+---
+
+## Tools Used
+
+### Setup (Kali)
+- Docker Engine  
+- Docker Compose plugin  
+
+### Testing
+- Web browser  
+
+---
+
+## VM Specs (Recommended)
+
+### Kali Linux
+- 2 vCPU  
+- 2–4 GB RAM  
+- ~30–40 GB disk  
+- 1 NIC (standard lab network)
+
+---
+
+## Prerequisites (Kali)
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable --now docker
+
+Docker Compose File
+Stored at:
+
+exercise-1-juiceshop/lab-setup/docker-compose.yml
+
+yaml
+Copy code
+services:
+  juiceshop:
+    image: bkimminich/juice-shop:latest
+    container_name: juiceshop
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
+Deployment
+
+cd exercise-1-juiceshop/lab-setup
+docker compose pull
+docker compose up -d
+docker compose ps
+
+Validation
+Open in the Kali browser:
+
+http://localhost:3000
+
+Setup Evidence (This Repo)
+Stored under:
+
+exercise-1-juiceshop/lab-setup/
+
+Recommended items:
+
+docker-compose.yml
+
+Container running screenshot
+
+Juice Shop homepage screenshot with the URL visible
+
+Notes
+OWASP Juice Shop is intentionally vulnerable training software.
+
+All testing for this exercise is performed locally in the lab environment.
+
+No external systems or real user accounts are involved.
